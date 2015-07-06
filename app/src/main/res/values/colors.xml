@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="primary">#009688</color>
+    <color name="primary_dark">#00796B</color>
+    <color name="primary_light">#B2DFDB</color>
+    <color name="accent">#536DFE</color>
+    <color name="primary_text">#212121</color>
+    <color name="secondary_text">#727272</color>
+    <color name="icons">#FFFFFF</color>
+    <color name="divider">#B6B6B6</color>
+
+    <color name="mtrl_light">#FFFFFF</color>
+    <color name="mtrl_dark">#212121</color>
+    <color name="mtrl_red">#F44336</color>
+    <color name="mtrl_pink">#E91E63</color>
+    <color name="mtrl_purple">#9C27B0</color>
+    <color name="mtrl_deep_purple">#673AB7</color>
+    <color name="mtrl_indigo">#3F51B5</color>
+    <color name="mtrl_blue">#2196F3</color>
+    <color name="mtrl_light_blue">#03A9F4</color>
+    <color name="mtrl_cyan">#00BCD4</color>
+    <color name="mtrl_teal">#009688</color>
+    <color name="mtrl_green">#4CAF50</color>
+    <color name="mtrl_light_green">#8BC34A</color>
+    <color name="mtrl_lime">#CDDC39</color>
+    <color name="mtrl_yellow">#FFEB3B</color>
+    <color name="mtrl_amber">#FFC107</color>
+    <color name="mtrl_orange">#FF9800</color>
+    <color name="mtrl_deep_orange">#FF5722</color>
+    <color name="mtrl_brown">#795548</color>
+    <color name="mtrl_grey">#9E9E9E</color>
+    <color name="mtrl_blue_grey">#455A64</color>
+
+    <array name="mtrl_colors">
+        <item>@color/mtrl_light</item>
+        <item>@color/mtrl_dark</item>
+        <item>@color/mtrl_red</item>
+        <item>@color/mtrl_pink</item>
+        <item>@color/mtrl_purple</item>
+        <item>@color/mtrl_deep_purple</item>
+        <item>@color/mtrl_indigo</item>
+        <item>@color/mtrl_blue</item>
+        <item>@color/mtrl_light_blue</item>
+        <item>@color/mtrl_cyan</item>
+        <item>@color/mtrl_teal</item>
+        <item>@color/mtrl_green</item>
+        <item>@color/mtrl_light_green</item>
+        <item>@color/mtrl_lime</item>
+        <item>@color/mtrl_yellow</item>
+        <item>@color/mtrl_amber</item>
+        <item>@color/mtrl_orange</item>
+        <item>@color/mtrl_deep_orange</item>
+        <item>@color/mtrl_brown</item>
+        <item>@color/mtrl_grey</item>
+        <item>@color/mtrl_blue_grey</item>
+    </array>
+</resources>
