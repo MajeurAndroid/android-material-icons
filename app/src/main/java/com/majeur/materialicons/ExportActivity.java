@@ -213,7 +213,7 @@ public class ExportActivity extends ActionBarActivity implements DirectoryChoose
                 new MaterialDialog.Builder(ExportActivity.this)
                         .title(R.string.success)
                         .content(R.string.icons_exported_correctly)
-                        .negativeText(android.R.string.cancel)
+                        .negativeText(android.R.string.ok)
                         .show();
             }
         }).execute(params);
