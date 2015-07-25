@@ -38,6 +38,10 @@ public class MainActivity extends ActionBarActivity implements Adapter.ItemsClic
         mAdapter = new Adapter(MainActivity.this, MainActivity.this);
         recyclerView.setAdapter(mAdapter);
 
+        fetchData();
+    }
+
+    private void fetchData() {
         new DataAsyncTask(this, new DataAsyncTask.OnDataLoadedListener() {
             @Override
             public void onDataLoaded(String[] fileNames) {
@@ -89,6 +93,9 @@ public class MainActivity extends ActionBarActivity implements Adapter.ItemsClic
                 return true;
             case R.id.action_info:
                 showInfoDialog();
+                return true;
+            case R.id.action_update:
+                fetchData();
                 return true;
             default:
                 return false;

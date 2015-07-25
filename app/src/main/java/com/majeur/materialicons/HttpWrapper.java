@@ -46,7 +46,8 @@ public final class HttpWrapper {
             URLConnection connection = url.openConnection();
             connection.connect();
 
-            InputStream inputStream = new BufferedInputStream(url.openStream(), 8192);
+            InputStream urlStream = url.openStream();
+            InputStream inputStream = new BufferedInputStream(urlStream, 8192);
 
             byte data[] = new byte[1024];
             int count;
@@ -57,6 +58,7 @@ public final class HttpWrapper {
             outputStream.flush();
             outputStream.close();
             inputStream.close();
+            urlStream.close();
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -3,13 +3,18 @@ package com.majeur.materialicons;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.os.Handler;
+import android.os.Looper;
 
 import com.larvalabs.svgandroid.SVG;
 import com.larvalabs.svgandroid.SVGParseException;
 import com.larvalabs.svgandroid.SVGParser;
 
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,7 +34,7 @@ public class Utils {
 
     public static Drawable getDrawableForSvg(Context context, String fileName) {
         try {
-            FileInputStream inputStream = new FileInputStream(context.getCacheDir() + MainActivity.ICONS_PATH + fileName);
+            FileInputStream inputStream = new FileInputStream(context.getFilesDir() + MainActivity.ICONS_PATH + fileName);
             SVG svg = SVGParser.getSVGFromInputStream(inputStream, Color.BLACK, Color.DKGRAY);
 
             return svg.createPictureDrawable();
@@ -55,4 +60,27 @@ public class Utils {
         return list;
     }
 
+    public static void writeFile(String path, InputStream inputStream) {
+        try {
+            File file = new File(path);
+            if (!file.exists()) file.createNewFile();
+
+            FileOutputStream outputStream = new FileOutputStream(path);
+            byte data[] = new byte[1024];
+            int count;
+            while ((count = inputStream.read(data)) != -1)
+                // writing data to file
+                outputStream.write(data, 0, count);
+
+            inputStream.close();
+            outputStream.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void runOnUiThread(Runnable r) {
+        new Handler(Looper.getMainLooper()).post(r);
+    }
 }

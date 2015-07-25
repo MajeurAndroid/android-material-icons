@@ -1,57 +1,75 @@
 package com.majeur.materialicons;
 
-import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.res.AssetManager;
 import android.os.AsyncTask;
-import android.text.TextUtils;
 import android.util.Log;
+import android.widget.Toast;
+
+import com.afollestad.materialdialogs.MaterialDialog;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * This class is used to retrieve icons and keep local copies up to date.
+ * On the server side, there is two manifests, main.manifest which contains the count
+ * of available icons on the server, and files.manifest which contains the name of each files.
+ * These manifest are separated to allow us to compare available items count without downloading
+ * all file list (up to 1000 items), thus we use a minimal amount of the user connection data.
+ * <p/>
+ * On the server files are in the same folder, to get download url, we just need the file name, then
+ * we format it with the "folder" url.
+ */
 public class DataAsyncTask extends AsyncTask<Void, String, String[]> {
 
     private static final String TAG = "DataAsyncTask";
 
-    private static final String MANIFEST_URI = "http://majeurandroid.github.io/Material-Icons/manifest";
-    private final String MANIFEST_PATH; // Not static because it is set later
+    private static final String MANIFEST_MAIN_URL = "http://majeurandroid.github.io/Material-Icons/main.manifest";
+    private static final String MANIFEST_FILES_URL = "http://majeurandroid.github.io/Material-Icons/files.manifest";
+    private static final String FILES_URL_UNFORMATTED = "http://majeurandroid.github.io/Material-Icons/icons/%s";
     private static final String JSON_ARG_COUNT = "count";
-    private static final String JSON_ARG_ITEMS = "items";
-    private static final String JSON_ARG_URL = "url";
     private static final String JSON_ARG_NAME = "name";
 
     private Context mContext;
-    private ProgressDialog mDialog;
+    private MaterialDialog mDialog;
     private OnDataLoadedListener mListener;
 
     private File mIconsDirectory;
 
-    private JSONObject mNetManifest, mLocalManifest;
+    private JSONObject mNetManifest;
 
     DataAsyncTask(Context context, OnDataLoadedListener loadedListener) {
         mContext = context;
         mListener = loadedListener;
 
-        mDialog = new ProgressDialog(context);
-        mDialog.setMessage("");
-        mDialog.setIndeterminate(true);
-        mDialog.setCancelable(false);
+        mDialog = new MaterialDialog.Builder(context)
+                .progressIndeterminateStyle(false)
+                .progress(true, 0)
+                .content("")
+                .cancelable(false)
+                .positiveText(android.R.string.cancel)
+                .callback(new MaterialDialog.ButtonCallback() {
+                    @Override
+                    public void onPositive(MaterialDialog dialog) {
+                        super.onPositive(dialog);
+                        cancel(false); // Cancel but don't interrupt, we still want already downloaded icons
+                    }
+                })
+                .build();
 
-        MANIFEST_PATH = context.getCacheDir() + File.separator + "manifest";
-
-        mIconsDirectory = new File(context.getCacheDir().getAbsolutePath() + MainActivity.ICONS_PATH);
+        mIconsDirectory = new File(context.getFilesDir().getAbsolutePath() + MainActivity.ICONS_PATH);
         if (!mIconsDirectory.exists())
+            // Create local icons directory
             mIconsDirectory.mkdir();
     }
 
@@ -63,15 +81,26 @@ public class DataAsyncTask extends AsyncTask<Void, String, String[]> {
 
     @Override
     protected String[] doInBackground(Void... params) {
-        publishProgress("Checking if local data is up to date ...");
-        updateLocalManifest();
-        setManifests();
+        publishProgress(mContext.getString(R.string.data_task_msg_1));
 
-        if (mNetManifest != null)
+        checkFirstLaunch();
+
+        mNetManifest = getNetManifest();
+
+        if (mNetManifest != null) {
+            // If network manifest is available, we check if local data is up to date
             checkLocalData();
-        else
+        } else {
+            Utils.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(mContext, R.string.net_required, Toast.LENGTH_LONG).show();
+                }
+            });
             Log.e(TAG, "Error when downloading manifest");
+        }
 
+        publishProgress(mContext.getString(R.string.data_task_msg_3));
 
         String[] fileNames = mIconsDirectory.list();
         Arrays.sort(fileNames);
@@ -85,6 +114,14 @@ public class DataAsyncTask extends AsyncTask<Void, String, String[]> {
     }
 
     @Override
+    protected void onCancelled(String[] files) {
+        super.onCancelled(files);
+        mDialog.dismiss();
+
+        mListener.onDataLoaded(files);
+    }
+
+    @Override
     protected void onPostExecute(String[] files) {
         super.onPostExecute(files);
         mDialog.dismiss();
@@ -92,78 +129,105 @@ public class DataAsyncTask extends AsyncTask<Void, String, String[]> {
         mListener.onDataLoaded(files);
     }
 
-    private void setManifests() {
-        try {
-            String rawLocalManifest = "";
+    private void checkFirstLaunch() {
+        if (mIconsDirectory.list().length == 0) {
+            AssetManager manager = mContext.getAssets();
+            try {
+                for (String assetChild : manager.list("icons")) {
 
-            FileInputStream inputStream = new FileInputStream(MANIFEST_PATH);
-            byte[] buffer = new byte[1024];
-            int n;
-            while ((n = inputStream.read(buffer)) != -1)
-                rawLocalManifest += new String(buffer, 0, n);
+                    String path = mContext.getFilesDir().getAbsolutePath() + MainActivity.ICONS_PATH +
+                            File.separator + assetChild;
 
-            if (!TextUtils.isEmpty(rawLocalManifest))
-                mLocalManifest = new JSONObject(rawLocalManifest);
-
-        } catch (JSONException | IOException e) {
-            e.printStackTrace();
+                    Utils.writeFile(path, manager.open("icons/" + assetChild));
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
+    }
 
+    /**
+     * Retrieve, if possible, local and network manifest.
+     */
+    private JSONObject getNetManifest() {
         try {
-            String rawNetManifest = HttpWrapper.makeRequest(MANIFEST_URI);
+            String rawNetManifest = HttpWrapper.makeRequest(MANIFEST_MAIN_URL);
 
             if (rawNetManifest != null)
-                mNetManifest = new JSONObject(rawNetManifest);
+                return new JSONObject(rawNetManifest);
 
         } catch (JSONException e) {
             e.printStackTrace();
         }
+        return null;
     }
 
+    /**
+     * Check if local data is up to date, if not, update it.
+     */
     private void checkLocalData() {
-        if (!localDataUpToDate()) {
-            List<JSONObject> jsonsToLoad = getJsonsToLoad();
-            int size = jsonsToLoad.size();
+        if (isLocalDataUpToDate())
+            return;// Data is up to date
 
-            for (int i = 0; i < size; i++) {
-                publishProgress("Downloading new icons ... (" + i + "/" + size + ")");
+        List<JSONObject> itemsToDownload = getItemsToDownload();
+        int size = itemsToDownload.size();
 
-                JSONObject json = jsonsToLoad.get(i);
-                if (!downloadIcon(json))
-                    Log.e(TAG, "Error when downloading following Json: " + json.toString());
-            }
-            publishProgress("Updating local data ...");
-            updateLocalManifest();
+        // Download missing items
+        for (int i = 0; i < size; i++) {
+            if (isCancelled())
+                return;
+
+            publishProgress(mContext.getString(R.string.data_task_msg_2, i, size));
+
+            JSONObject json = itemsToDownload.get(i);
+
+            if (!downloadIcon(json)) // Downloading icon
+                Log.e(TAG, "Error when downloading following Json: " + json.toString());
         }
     }
 
-    private boolean localDataUpToDate() {
+    /**
+     * Check if local icons count matches server items count.
+     *
+     * @return True if local data is up to date
+     */
+    private boolean isLocalDataUpToDate() {
         try {
-            return mLocalManifest != null && mLocalManifest.getInt(JSON_ARG_COUNT) == mNetManifest.getInt(JSON_ARG_COUNT);
+            return mIconsDirectory.list().length == mNetManifest.getInt(JSON_ARG_COUNT);
         } catch (JSONException e) {
             e.printStackTrace();
             return false;
         }
     }
 
-    private List<JSONObject> getJsonsToLoad() {
+    /**
+     * Retrieve a list of locally missing icons.
+     *
+     * @return List of icons to download formatted in JSON
+     */
+    private List<JSONObject> getItemsToDownload() {
         List<JSONObject> urlsToLoad = new ArrayList<>();
 
         try {
-            JSONArray netItems = mNetManifest.getJSONArray(JSON_ARG_ITEMS);
+            // We need the server files.manifest to find missing icons
+            String rawNetFilesManifest = HttpWrapper.makeRequest(MANIFEST_FILES_URL);
+            JSONArray netItems = new JSONArray(rawNetFilesManifest);
 
-            if (mLocalManifest == null) {
+            if (mIconsDirectory.list().length == 0) {
                 // Download everything
                 for (int i = 0; i < netItems.length(); i++)
                     urlsToLoad.add(netItems.getJSONObject(i));
 
             } else {
-                // Download only missing icons
-                JSONArray localItems = mLocalManifest.getJSONArray(JSON_ARG_ITEMS);
+                List<String> localItems = Arrays.asList(mIconsDirectory.list());
 
                 for (int i = 0; i < netItems.length(); i++) {
+                    // We iterate through network items to check if each one is present in local folder.
+
                     JSONObject netJson = netItems.getJSONObject(i);
-                    if (!containsName(localItems, netJson))
+                    String netItemName = netJson.getString(JSON_ARG_NAME);
+
+                    if (!localItems.contains(netItemName))
                         urlsToLoad.add(netJson);
                 }
             }
@@ -173,23 +237,20 @@ public class DataAsyncTask extends AsyncTask<Void, String, String[]> {
         return urlsToLoad;
     }
 
-    private boolean containsName(JSONArray localItems, JSONObject netJson) throws JSONException {
-        String netName = netJson.getString(JSON_ARG_NAME);
-
-        for (int i = 0; i < localItems.length(); i++) {
-            String localName = localItems.getJSONObject(i).getString(JSON_ARG_NAME);
-            if (netName.equals(localName))
-                return true;
-        }
-        return false;
-    }
-
+    /**
+     * Downloads requested item from the server.
+     *
+     * @param json JSON that contains icon name
+     * @return True if download was successful
+     */
     private boolean downloadIcon(JSONObject json) {
         Log.i(TAG, "Downloading Json: " + json.toString());
+
         try {
-            String url = json.getString(JSON_ARG_URL);
-            // Output stream
-            File outputFile = new File(mContext.getCacheDir().getAbsolutePath() + MainActivity.ICONS_PATH +
+            // Getting download url
+            String url = String.format(FILES_URL_UNFORMATTED, json.getString(JSON_ARG_NAME));
+
+            File outputFile = new File(mContext.getFilesDir().getAbsolutePath() + MainActivity.ICONS_PATH +
                     File.separator + json.getString(JSON_ARG_NAME));
 
             if (!outputFile.exists())
@@ -200,45 +261,11 @@ public class DataAsyncTask extends AsyncTask<Void, String, String[]> {
             // HttpWrapper takes care of closing streams
             HttpWrapper.downloadFile(url, outputStream);
 
-            updateLocalManifest();
-
             return true;
         } catch (IOException | JSONException e) {
             e.printStackTrace();
             return false;
         }
-
-
-    }
-
-    private void updateLocalManifest() {
-        try {
-            JSONObject rootJson = new JSONObject();
-
-            String[] iconNames = mIconsDirectory.list();
-
-            rootJson.put(JSON_ARG_COUNT, iconNames.length);
-
-            JSONArray jsonArray = new JSONArray();
-
-            for (String iconName : iconNames) {
-                JSONObject jsonChild = new JSONObject();
-                jsonChild.put(JSON_ARG_NAME, iconName);
-
-                jsonArray.put(jsonChild);
-            }
-
-            rootJson.put(JSON_ARG_ITEMS, jsonArray);
-
-            FileWriter fileWriter = new FileWriter(MANIFEST_PATH);
-            fileWriter.write(rootJson.toString());
-            fileWriter.close();
-
-        } catch (IOException | JSONException e) {
-            Log.e(TAG, "Error when updating local manifest");
-            e.printStackTrace();
-        }
-
     }
 
     interface OnDataLoadedListener {

@@ -154,7 +154,8 @@ public class AsyncExporter extends AsyncTask<AsyncExporter.Params, AsyncExporter
 
     private Bitmap getBitmapSvg(Params params, String fileName, int densityIndex) {
         try {
-            SVG svg = SVGParser.getSVGFromAsset(mContext.getAssets(), MainActivity.ICONS_PATH + fileName);
+            FileInputStream inputStream = new FileInputStream(mContext.getFilesDir() + MainActivity.ICONS_PATH + fileName);
+            SVG svg = SVGParser.getSVGFromInputStream(inputStream);
 
             // Icon size relative to current processed density
             int fSize = ICONS_SIZE[densityIndex];
