@@ -267,7 +267,7 @@ public class ExportActivity extends ActionBarActivity implements DirectoryChoose
             }
 
             String fileName = mAssetsFiles.get(position);
-            holder.imageView.setImageDrawable(Utils.getDrawableForSvg(ExportActivity.this.getAssets(), fileName));
+            holder.imageView.setImageDrawable(Utils.getDrawableForSvg(ExportActivity.this, fileName));
             holder.textView.setText(Utils.svgFileNameToLabel(fileName));
 
             return convertView;

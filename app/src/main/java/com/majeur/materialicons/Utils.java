@@ -1,6 +1,6 @@
 package com.majeur.materialicons;
 
-import android.content.res.AssetManager;
+import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 
@@ -8,6 +8,7 @@ import com.larvalabs.svgandroid.SVG;
 import com.larvalabs.svgandroid.SVGParseException;
 import com.larvalabs.svgandroid.SVGParser;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,9 +27,10 @@ public class Utils {
         return result.substring(0, result.length() - 1);
     }
 
-    public static Drawable getDrawableForSvg(AssetManager assetManager, String fileName) {
+    public static Drawable getDrawableForSvg(Context context, String fileName) {
         try {
-            SVG svg = SVGParser.getSVGFromAsset(assetManager, MainActivity.ICONS_PATH + fileName, Color.BLACK, Color.DKGRAY);
+            FileInputStream inputStream = new FileInputStream(context.getCacheDir() + MainActivity.ICONS_PATH + fileName);
+            SVG svg = SVGParser.getSVGFromInputStream(inputStream, Color.BLACK, Color.DKGRAY);
 
             return svg.createPictureDrawable();
         } catch (IOException | SVGParseException e) {

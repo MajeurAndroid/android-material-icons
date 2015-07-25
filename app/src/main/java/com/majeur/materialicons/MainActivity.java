@@ -19,9 +19,9 @@ import java.util.List;
 public class MainActivity extends ActionBarActivity implements Adapter.ItemsClickListener, ActionMode.Callback {
 
     private static final String TAG = "MainActivity";
-    public static final String ICONS_DIR = "icons", ICONS_PATH = "icons/";
+    public static final String ICONS_PATH = "/icons/";
 
-    private String[] mAssetsFiles;
+    private String[] mFilesName;
     private Adapter mAdapter;
 
     private ActionMode mActionMode;
@@ -38,18 +38,18 @@ public class MainActivity extends ActionBarActivity implements Adapter.ItemsClic
         mAdapter = new Adapter(MainActivity.this, MainActivity.this);
         recyclerView.setAdapter(mAdapter);
 
-        new AsyncAssetsLoader(getAssets(), new AsyncAssetsLoader.OnAssetsLoadedListener() {
+        new DataAsyncTask(this, new DataAsyncTask.OnDataLoadedListener() {
             @Override
-            public void onAssetsLoaded(String[] assets) {
-                if (assets == null) {
+            public void onDataLoaded(String[] fileNames) {
+                if (fileNames == null) {
                     Toast.makeText(MainActivity.this, R.string.io_error, Toast.LENGTH_LONG).show();
                     finish();
                 } else {
-                    mAssetsFiles = assets;
-                    mAdapter.setAssetsFiles(assets);
+                    mFilesName = fileNames;
+                    mAdapter.setFilesName(fileNames);
                 }
             }
-        }).execute(ICONS_DIR);
+        }).execute();
     }
 
     @Override
@@ -148,7 +148,7 @@ public class MainActivity extends ActionBarActivity implements Adapter.ItemsClic
     private String[] getFilesNameForPosition(List<Integer> list) {
         String[] fileNames = new String[list.size()];
         for (int i = 0; i < fileNames.length; i++)
-            fileNames[i] = mAssetsFiles[list.get(i)];
+            fileNames[i] = mFilesName[list.get(i)];
         return fileNames;
     }
 }

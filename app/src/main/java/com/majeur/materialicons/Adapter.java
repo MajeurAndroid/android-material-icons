@@ -29,7 +29,7 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
         mSelectedCardColor = mainActivity.getResources().getColor(R.color.primary_light);
     }
 
-    public void setAssetsFiles(String[] assetsFiles) {
+    public void setFilesName(String[] assetsFiles) {
         mAssetsFiles = assetsFiles;
         notifyDataSetChanged();
     }
@@ -47,7 +47,7 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
         viewHolder.titleView.setText(Utils.svgFileNameToLabel(fileName));
         setCardViewSelected(viewHolder.view, mSelectedItems.contains(i));
 
-        viewHolder.iconView.setImageDrawable(Utils.getDrawableForSvg(mActivity.getAssets(), fileName));
+        viewHolder.iconView.setImageDrawable(Utils.getDrawableForSvg(mActivity, fileName));// TODO Eventually Asynchronously
     }
 
     private void setCardViewSelected(CardView cardView, boolean selected) {
