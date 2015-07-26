@@ -26,6 +26,7 @@ import net.rdrei.android.dirchooser.DirectoryChooserFragment;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class ExportActivity extends ActionBarActivity implements DirectoryChooserFragment.OnFragmentInteractionListener {
@@ -49,7 +50,7 @@ public class ExportActivity extends ActionBarActivity implements DirectoryChoose
         setContentView(R.layout.activity_export);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        mAssetsFiles = Utils.arrayAsList(getIntent().getStringArrayExtra(EXTRA_SELECTED_ITEMS));
+        mAssetsFiles = Arrays.asList(getIntent().getStringArrayExtra(EXTRA_SELECTED_ITEMS));
 
         View colorButton = findViewById(R.id.color_button);
         colorButton.setOnClickListener(mColorClickListener);

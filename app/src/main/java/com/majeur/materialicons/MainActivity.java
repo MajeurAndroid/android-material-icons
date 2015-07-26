@@ -43,7 +43,7 @@ public class MainActivity extends ActionBarActivity implements Adapter.ItemsClic
     }
 
     private void fetchData() {
-        new DataAsyncTask(this, new DataAsyncTask.OnDataLoadedListener() {
+        new AsyncDataRetriever(this, new AsyncDataRetriever.OnDataLoadedListener() {
             @Override
             public void onDataLoaded(String[] fileNames, List<String> sectionNames, List<Integer> sectionPositions) {
                 if (fileNames == null) {

@@ -15,8 +15,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
 
 public class Utils {
 
@@ -51,13 +49,6 @@ public class Utils {
                 return i;
         }
         return -1;
-    }
-
-    public static List<String> arrayAsList(String[] a) {
-        List<String> list = new ArrayList<>(a.length);
-        for (String s : a)
-            list.add(s);
-        return list;
     }
 
     public static void writeFile(String path, InputStream inputStream) {

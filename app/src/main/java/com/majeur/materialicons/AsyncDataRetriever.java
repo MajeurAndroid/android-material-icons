@@ -30,7 +30,7 @@ import java.util.List;
  * On the server files are in the same folder, to get download url, we just need the file name, then
  * we format it with the "folder" url.
  */
-public class DataAsyncTask extends AsyncTask<Void, String, DataAsyncTask.Result> {
+public class AsyncDataRetriever extends AsyncTask<Void, String, AsyncDataRetriever.Result> {
 
     private static final String TAG = "DataAsyncTask";
 
@@ -54,7 +54,7 @@ public class DataAsyncTask extends AsyncTask<Void, String, DataAsyncTask.Result>
         List<Integer> sectPos;
     }
 
-    DataAsyncTask(Context context, OnDataLoadedListener loadedListener) {
+    AsyncDataRetriever(Context context, OnDataLoadedListener loadedListener) {
         mContext = context;
         mListener = loadedListener;
 
