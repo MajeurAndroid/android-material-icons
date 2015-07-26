@@ -83,4 +83,23 @@ public class Utils {
     public static void runOnUiThread(Runnable r) {
         new Handler(Looper.getMainLooper()).post(r);
     }
+
+    public static class Tuple<T, K> {
+
+        private T mT;
+        private K mK;
+
+        public Tuple(T t, K k) {
+            mT = t;
+            mK = k;
+        }
+
+        public T get0() {
+            return mT;
+        }
+
+        public K get1() {
+            return mK;
+        }
+    }
 }

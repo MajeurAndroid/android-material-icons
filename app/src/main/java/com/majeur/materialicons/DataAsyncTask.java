@@ -30,7 +30,7 @@ import java.util.List;
  * On the server files are in the same folder, to get download url, we just need the file name, then
  * we format it with the "folder" url.
  */
-public class DataAsyncTask extends AsyncTask<Void, String, String[]> {
+public class DataAsyncTask extends AsyncTask<Void, String, DataAsyncTask.Result> {
 
     private static final String TAG = "DataAsyncTask";
 
@@ -47,6 +47,12 @@ public class DataAsyncTask extends AsyncTask<Void, String, String[]> {
     private File mIconsDirectory;
 
     private JSONObject mNetManifest;
+
+    static final class Result {
+        String[] files;
+        List<String> sectNames;
+        List<Integer> sectPos;
+    }
 
     DataAsyncTask(Context context, OnDataLoadedListener loadedListener) {
         mContext = context;
@@ -80,7 +86,7 @@ public class DataAsyncTask extends AsyncTask<Void, String, String[]> {
     }
 
     @Override
-    protected String[] doInBackground(Void... params) {
+    protected Result doInBackground(Void... params) {
         publishProgress(mContext.getString(R.string.data_task_msg_1));
 
         checkFirstLaunch();
@@ -102,9 +108,18 @@ public class DataAsyncTask extends AsyncTask<Void, String, String[]> {
 
         publishProgress(mContext.getString(R.string.data_task_msg_3));
 
+        verifyIconsValidity();
+
         String[] fileNames = mIconsDirectory.list();
         Arrays.sort(fileNames);
-        return fileNames;
+
+        Utils.Tuple<List<String>, List<Integer>> sectionsInfo = getSectionsInfo(fileNames);
+
+        Result result = new Result();
+        result.files = fileNames;
+        result.sectNames = sectionsInfo.get0();
+        result.sectPos = sectionsInfo.get1();
+        return result;
     }
 
     @Override
@@ -114,19 +129,23 @@ public class DataAsyncTask extends AsyncTask<Void, String, String[]> {
     }
 
     @Override
-    protected void onCancelled(String[] files) {
-        super.onCancelled(files);
+    protected void onCancelled(Result result) {
+        super.onCancelled(result);
         mDialog.dismiss();
 
-        mListener.onDataLoaded(files);
+        mListener.onDataLoaded(result.files,
+                result.sectNames,
+                result.sectPos);
     }
 
     @Override
-    protected void onPostExecute(String[] files) {
-        super.onPostExecute(files);
+    protected void onPostExecute(Result result) {
+        super.onPostExecute(result);
         mDialog.dismiss();
 
-        mListener.onDataLoaded(files);
+        mListener.onDataLoaded(result.files,
+                result.sectNames,
+                result.sectPos);
     }
 
     private void checkFirstLaunch() {
@@ -147,7 +166,7 @@ public class DataAsyncTask extends AsyncTask<Void, String, String[]> {
     }
 
     /**
-     * Retrieve, if possible, local and network manifest.
+     * Retrieve, if possible, network manifest.
      */
     private JSONObject getNetManifest() {
         try {
@@ -268,7 +287,56 @@ public class DataAsyncTask extends AsyncTask<Void, String, String[]> {
         }
     }
 
+    /**
+     * Checks if all icons are valid to avoid svg parse issues later
+     */
+    private void verifyIconsValidity() {
+        for (File child : mIconsDirectory.listFiles()) {
+            if (child.length() == 0) {
+                child.delete();
+                Log.e(TAG, "Error downloading " + child.getName() + ", deleting");
+            }
+        }
+    }
+
+    /**
+     * Creates sections info for recycler view. It contains 1000+ items, so do it asynchronously
+     * is advised
+     *
+     * @param filesName final file names
+     * @return Tuple containing sections info
+     */
+    private Utils.Tuple<List<String>, List<Integer>> getSectionsInfo(String[] filesName) {
+        List<Integer> sectPositions = new ArrayList<>();
+        List<String> sectNames = new ArrayList<>();
+
+        boolean nonLetterAdded = false;
+        char prevCh = ' ';
+
+        for (int i = 0; i < filesName.length; i++) {
+            String label = filesName[i].toUpperCase();
+            Character ch = label.charAt(0);
+
+            //building section with only one time 1st letter
+            if (!Character.isLetter(ch)) {
+                if (!nonLetterAdded) {
+                    sectNames.add("#");
+                    sectPositions.add(i);
+                    nonLetterAdded = true;
+                }
+                continue;
+            }
+            if (!ch.equals(prevCh)) {
+                prevCh = ch;
+                sectNames.add(ch.toString());
+                sectPositions.add(i);
+            }
+        }
+
+        return new Utils.Tuple<>(sectNames, sectPositions);
+    }
+
     interface OnDataLoadedListener {
-        public void onDataLoaded(String[] fileNames);
+        public void onDataLoaded(String[] fileNames, List<String> sectionNames, List<Integer> sectionPositions);
     }
 }

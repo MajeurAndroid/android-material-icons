@@ -32,7 +32,7 @@
                 android:layout_weight="8"
                 android:gravity="center">
 
-                <ImageView
+                <com.majeur.materialicons.SVGView
                     android:id="@+id/icon"
                     android:layout_width="@dimen/icon_size"
                     android:layout_height="@dimen/icon_size"

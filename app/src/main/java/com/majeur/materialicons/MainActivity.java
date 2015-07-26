@@ -3,7 +3,6 @@ package com.majeur.materialicons;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.ActionMode;
 import android.view.Menu;
@@ -23,6 +22,7 @@ public class MainActivity extends ActionBarActivity implements Adapter.ItemsClic
 
     private String[] mFilesName;
     private Adapter mAdapter;
+    private IndexableRecyclerView mRecyclerView;
 
     private ActionMode mActionMode;
 
@@ -31,12 +31,13 @@ public class MainActivity extends ActionBarActivity implements Adapter.ItemsClic
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
-        recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(new StaggeredGridLayoutManager(getResources().getInteger(R.integer.main_grid_num_col),
+        mRecyclerView = (IndexableRecyclerView) findViewById(R.id.recycler_view);
+        mRecyclerView.setFastScrollEnabled(true);
+        mRecyclerView.setHasFixedSize(true);
+        mRecyclerView.setLayoutManager(new StaggeredGridLayoutManager(getResources().getInteger(R.integer.main_grid_num_col),
                 StaggeredGridLayoutManager.VERTICAL));
         mAdapter = new Adapter(MainActivity.this, MainActivity.this);
-        recyclerView.setAdapter(mAdapter);
+        mRecyclerView.setAdapter(mAdapter);
 
         fetchData();
     }
@@ -44,12 +45,13 @@ public class MainActivity extends ActionBarActivity implements Adapter.ItemsClic
     private void fetchData() {
         new DataAsyncTask(this, new DataAsyncTask.OnDataLoadedListener() {
             @Override
-            public void onDataLoaded(String[] fileNames) {
+            public void onDataLoaded(String[] fileNames, List<String> sectionNames, List<Integer> sectionPositions) {
                 if (fileNames == null) {
                     Toast.makeText(MainActivity.this, R.string.io_error, Toast.LENGTH_LONG).show();
                     finish();
                 } else {
                     mFilesName = fileNames;
+                    mRecyclerView.setSections(sectionNames, sectionPositions);
                     mAdapter.setFilesName(fileNames);
                 }
             }

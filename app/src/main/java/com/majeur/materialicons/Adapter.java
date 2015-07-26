@@ -6,7 +6,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -14,7 +13,7 @@ import java.util.List;
 
 public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
 
-    private String[] mAssetsFiles;
+    private String[] mFiles;
     private MainActivity mActivity;
     private ItemsClickListener mListener;
 
@@ -29,8 +28,8 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
         mSelectedCardColor = mainActivity.getResources().getColor(R.color.primary_light);
     }
 
-    public void setFilesName(String[] assetsFiles) {
-        mAssetsFiles = assetsFiles;
+    public void setFilesName(String[] filesName) {
+        mFiles = filesName;
         notifyDataSetChanged();
     }
 
@@ -42,12 +41,12 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
 
     @Override
     public void onBindViewHolder(final ViewHolder viewHolder, int i) {
-        String fileName = mAssetsFiles[i];
+        String fileName = mFiles[i];
 
         viewHolder.titleView.setText(Utils.svgFileNameToLabel(fileName));
         setCardViewSelected(viewHolder.view, mSelectedItems.contains(i));
 
-        viewHolder.iconView.setImageDrawable(Utils.getDrawableForSvg(mActivity, fileName));// TODO Eventually Asynchronously
+        viewHolder.iconView.setSVGPath(mActivity.getFilesDir() + MainActivity.ICONS_PATH + fileName);
     }
 
     private void setCardViewSelected(CardView cardView, boolean selected) {
@@ -56,7 +55,7 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
 
     @Override
     public int getItemCount() {
-        return mAssetsFiles == null ? 0 : mAssetsFiles.length;
+        return mFiles == null ? 0 : mFiles.length;
     }
 
     public void toggleSelected(Integer position) {
@@ -84,7 +83,7 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
     public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
 
         public TextView titleView;
-        public ImageView iconView;
+        public SVGView iconView;
         public CardView view;
         private ItemsClickListener mListener;
 
@@ -92,7 +91,7 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
             super(itemView);
             view = (CardView) itemView;
             titleView = (TextView) itemView.findViewById(R.id.name);
-            iconView = (ImageView) itemView.findViewById(R.id.icon);
+            iconView = (SVGView) itemView.findViewById(R.id.icon);
             iconView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
 
             mListener = listener;
