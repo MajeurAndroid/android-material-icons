@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <integer name="color_grid_num_col">6</integer>
+    <integer name="main_grid_num_col">5</integer>
+</resources>

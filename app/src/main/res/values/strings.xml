@@ -15,7 +15,7 @@
 
     <string name="readme_msg">Thanks for using Material Icons android app.</string>
 
-    <string name="about_msg">This is unofficial android application of <a>https://materialdesignicons.com</a>.\n\nLicense:\nCommunity Icons - SIL Open Font License 1.1\nGoogle Material Design Icons - Attribution 4.0 International\nApplication - Apache 2.0\n\nSource code : <a>https://github.com/MajeurAndroid/Material-Icons</a>\nDeveloped by Majeur.</string>
+    <string name="about_msg">This is unofficial android application of <a>https://materialdesignicons.com</a>.\n\nLicense:\nCommunity Icons - SIL Open Font License 1.1\nGoogle Material Design Icons - Attribution 4.0 International\nApplication - Apache 2.0\n\nSource code : <a>https://github.com/MajeurAndroid/Android-Material-Icons</a>\nDeveloped by Majeur.</string>
     <string name="no_density_selected">No density selected</string>
     <string name="success">Success</string>
     <string name="icons_exported_correctly">Icons correctly exported !</string>

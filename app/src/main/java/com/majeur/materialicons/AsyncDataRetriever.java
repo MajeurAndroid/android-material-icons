@@ -34,9 +34,9 @@ public class AsyncDataRetriever extends AsyncTask<Void, String, AsyncDataRetriev
 
     private static final String TAG = "DataAsyncTask";
 
-    private static final String MANIFEST_MAIN_URL = "http://majeurandroid.github.io/Material-Icons/main.manifest";
-    private static final String MANIFEST_FILES_URL = "http://majeurandroid.github.io/Material-Icons/files.manifest";
-    private static final String FILES_URL_UNFORMATTED = "http://majeurandroid.github.io/Material-Icons/icons/%s";
+    private static final String MANIFEST_MAIN_URL = "http://majeurandroid.github.io/Android-Material-Icons/main.manifest";
+    private static final String MANIFEST_FILES_URL = "http://majeurandroid.github.io/Android-Material-Icons/files.manifest";
+    private static final String FILES_URL_UNFORMATTED = "http://majeurandroid.github.io/Android-Material-Icons/icons/%s";
     private static final String JSON_ARG_COUNT = "count";
     private static final String JSON_ARG_NAME = "name";
 
