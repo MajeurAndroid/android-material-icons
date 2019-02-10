@@ -37,7 +37,7 @@ public class ExportActivity extends ActionBarActivity implements DirectoryChoose
             R.id.checkbox_mdpi, R.id.checkbox_hdpi, R.id.checkbox_xhdpi,
             R.id.checkbox_xxhdpi, R.id.checkbox_xxxhdpi};
 
-    private List<String> mAssetsFiles;
+    private List<String> mAssetsFiles = new ArrayList<>();
     private int mColor = Color.DKGRAY;
 
     private View mColorPreview;
@@ -50,7 +50,7 @@ public class ExportActivity extends ActionBarActivity implements DirectoryChoose
         setContentView(R.layout.activity_export);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        mAssetsFiles = Arrays.asList(getIntent().getStringArrayExtra(EXTRA_SELECTED_ITEMS));
+        mAssetsFiles.addAll(Arrays.asList(getIntent().getStringArrayExtra(EXTRA_SELECTED_ITEMS)));
 
         View colorButton = findViewById(R.id.color_button);
         colorButton.setOnClickListener(mColorClickListener);
